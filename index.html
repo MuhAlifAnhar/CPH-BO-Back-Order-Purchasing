@@ -43,6 +43,7 @@
               <th>Status BO Sales</th>
               <th>Progress</th>
               <th>Action</th>
+              <th>Batal</th>
               <th>Lihat Detail</th>
             </tr>
           </thead>
@@ -112,6 +113,10 @@
             return; // skip row → baris dihapus total
           }
 
+          console.log(Object.keys(item));
+
+          console.log("RAW BATAL:", item["Batal"]);
+
           const row = $("<tr>");
           row.append($("<td>").text(item["TransID"] || ""));
           row.append($("<td>").text(item["Tanggal SO"] || ""));
@@ -127,19 +132,45 @@
             if (match) link = match[0];
           }
 
-          // Tombol action hanya untuk progress 1 dan 5
-          let actionButtons = "";
-          if (progress === "3") {
-            actionButtons = `<a class="btn btn-primary btn-sm" href="${link}" target="_blank">Step 3</a>`;
-          } else if (progress === "4") {
-            actionButtons = `<a class="btn btn-info btn-sm" href="${link}" target="_blank">Step 4</a>`;
-          } else if (progress == "6" || progress == "COMPLETE") {
-            actionButtons = `<button class="btn btn-dark btn-sm" disabled>Complete</button>`;
-          } else if (progress == "DIRECT") {
-            actionButtons = `<button class="btn btn-danger btn-sm" disabled>Rejected</button>`;
+          // --- Ekstrak URL batal (kolom AK) ---
+          let batalLink = item["Batal"] || "";
+          if (batalLink.includes("https://")) {
+            const matchBatal = batalLink.match(/https:\/\/[^\s")]+/);
+            if (matchBatal) batalLink = matchBatal[0];
+          } else {
+            batalLink = "";
           }
 
+          // Tombol action hanya untuk progress 1 dan 5
+          let actionButtons = "";
+
+          // tombol utama berdasarkan progress
+          if (progress === "3") {
+            actionButtons += `<a class="btn btn-primary btn-sm me-1" href="${link}" target="_blank">Step 3</a>`;
+          } else if (progress === "4") {
+            actionButtons += `<a class="btn btn-info btn-sm me-1" href="${link}" target="_blank">Step 4</a>`;
+          } else if (progress == "6" || progress == "COMPLETE") {
+            actionButtons += `<button class="btn btn-dark btn-sm me-1" disabled>Complete</button>`;
+          } else if (progress == "DIRECT") {
+            actionButtons += `<button class="btn btn-danger btn-sm me-1" disabled>Rejected</button>`;
+          }
+
+          // tombol BATAL (jika ada link)
+
           row.append($("<td>").html(actionButtons));
+
+          // === KOLOM BATAL ===
+          let batalButton = "";
+          if (batalLink) {
+            batalButton = `
+    <a class="btn btn-outline-danger btn-sm"
+       href="${batalLink}"
+       target="_blank"
+       onclick="return confirm('Yakin ingin membatalkan TransID ${item["TransID"]}?')">
+       Batal
+    </a>`;
+          }
+          row.append($("<td>").html(batalButton));
 
           // Tombol detail
           const detailBtn = `
