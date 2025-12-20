@@ -109,9 +109,6 @@
           let progress = (item["Progress"] || "").toString().trim();
 
           // === FILTER: hanya tampilkan progress 1 dan 5 ===
-          if (progress !== "3" && progress !== "4" && progress !== "5" && progress !== "7") {
-            return; // skip row → baris dihapus total
-          }
 
           console.log(Object.keys(item));
 
@@ -124,6 +121,8 @@
           row.append($("<td>").text(item["Nama Sales"] || ""));
           row.append($("<td>").text(item["Status BO Sales"] || ""));
           row.append($("<td>").text(progress));
+
+          const allowAction = ["3", "4", "5", "7"].includes(progress);
 
           // --- Ekstrak URL action ---
           let link = item["Action"] || "";
@@ -145,14 +144,18 @@
           let actionButtons = "";
 
           // tombol utama berdasarkan progress
-          if (progress === "3") {
-            actionButtons += `<a class="btn btn-primary btn-sm me-1" href="${link}" target="_blank">Step 3</a>`;
-          } else if (progress === "4") {
-            actionButtons += `<a class="btn btn-info btn-sm me-1" href="${link}" target="_blank">Step 4</a>`;
-          } else if (progress == "6" || progress == "COMPLETE") {
-            actionButtons += `<button class="btn btn-dark btn-sm me-1" disabled>Complete</button>`;
-          } else if (progress == "DIRECT") {
-            actionButtons += `<button class="btn btn-danger btn-sm me-1" disabled>Rejected</button>`;
+          if (allowAction) {
+            if (progress === "3") {
+              actionButtons += `<a class="btn btn-primary btn-sm me-1" href="${link}" target="_blank">Step 3</a>`;
+            } else if (progress === "4") {
+              actionButtons += `<a class="btn btn-info btn-sm me-1" href="${link}" target="_blank">Step 4</a>`;
+            } else if (progress === "5") {
+              actionButtons += `<a class="btn btn-info btn-sm me-1" href="${link}" target="_blank">Step 5</a>`;
+            } else if (progress == "7" || progress == "COMPLETE") {
+              actionButtons += `<button class="btn btn-dark btn-sm me-1" disabled>Complete</button>`;
+            } else if (progress == "DIRECT") {
+              actionButtons += `<button class="btn btn-danger btn-sm me-1" disabled>Rejected</button>`;
+            }
           }
 
           // tombol BATAL (jika ada link)
@@ -161,22 +164,22 @@
 
           // === KOLOM BATAL ===
           let batalButton = "";
-          if (batalLink) {
+          if (allowAction && batalLink) {
             batalButton = `
-    <a class="btn btn-outline-danger btn-sm"
-       href="${batalLink}"
-       target="_blank"
-       onclick="return confirm('Yakin ingin membatalkan TransID ${item["TransID"]}?')">
-       Batal
-    </a>`;
+        <a class="btn btn-outline-danger btn-sm"
+           href="${batalLink}"
+           target="_blank"
+           onclick="return confirm('Yakin ingin membatalkan TransID ${item["TransID"]}?')">
+           Batal
+        </a>`;
           }
           row.append($("<td>").html(batalButton));
 
           // Tombol detail
           const detailBtn = `
-      <button class="btn btn-outline-primary btn-sm" onclick="showDetail('${item["TransID"]}')" data-bs-toggle="modal" data-bs-target="#boModal">
-        <i class="bi bi-eye"></i>
-      </button>`;
+          <button class="btn btn-outline-primary btn-sm" onclick="showDetail('${item["TransID"]}')" data-bs-toggle="modal" data-bs-target="#boModal">
+            <i class="bi bi-eye"></i>
+          </button>`;
           row.append($("<td>").html(detailBtn));
 
           $("#boBody").append(row);
@@ -188,93 +191,93 @@
         if (!row) return;
 
         const modalHtml = `
-  <div>
-    <h5>(1/7) SO Belum Tersuplay</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Cabang</div><div class="card-body">${
-        row["Cabang"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Tanggal SO</div><div class="card-body">${
-        row["Tanggal SO"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Nama Toko</div><div class="card-body">${
-        row["Nama Toko"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Kode Barang</div><div class="card-body">${
-        row["Kode Barang"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Nama Barang</div><div class="card-body">${
-        row["Nama Barang"] || "-"
-      }</div></div></div>
-       <div class="col-md-4"><div class="card"><div class="card-header">QTY Sisa</div><div class="card-body">${
-         row["Qty Sisa"] || "-"
-       }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">SO Amount</div><div class="card-body">${
-        row["SO Amount"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Keterangan</div><div class="card-body">${
-        row["Keterangan"] || "-"
-      }</div></div></div>
-    </div>
+      <div>
+        <h5>(1/7) SO Belum Tersuplay</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Cabang</div><div class="card-body">${
+            row["Cabang"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Tanggal SO</div><div class="card-body">${
+            row["Tanggal SO"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Nama Toko</div><div class="card-body">${
+            row["Nama Toko"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Kode Barang</div><div class="card-body">${
+            row["Kode Barang"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Nama Barang</div><div class="card-body">${
+            row["Nama Barang"] || "-"
+          }</div></div></div>
+           <div class="col-md-4"><div class="card"><div class="card-header">QTY Sisa</div><div class="card-body">${
+             row["Qty Sisa"] || "-"
+           }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">SO Amount</div><div class="card-body">${
+            row["SO Amount"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Keterangan</div><div class="card-body">${
+            row["Keterangan"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(2/7) Approval Sales Counter</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Status BO Counter</div><div class="card-body">${
-        row["Status BO Counter"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Sales Counter By</div><div class="card-body">${
-        row["Sales Counter By"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Alasan Reject Counter</div><div class="card-body">${
-        row["Alasan Reject Counter"] || "-"
-      }</div></div></div>
-    </div>
+        <h5>(2/7) Approval Sales Counter</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Status BO Counter</div><div class="card-body">${
+            row["Status BO Counter"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Sales Counter By</div><div class="card-body">${
+            row["Sales Counter By"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Alasan Reject Counter</div><div class="card-body">${
+            row["Alasan Reject Counter"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(3/7) Upload Form BO</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Status BO Sales</div><div class="card-body">${
-        row["Status BO Sales"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">File Form BO</div><div class="card-body"><a href="${
-        row["File Form BO"] || "#"
-      }" target="_blank">Lihat Form</a></div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Alasan Reject Sales</div><div class="card-body">${
-        row["Alasan Reject Sales"] || "-"
-      }</div></div></div>
-    </div>
+        <h5>(3/7) Upload Form BO</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Status BO Sales</div><div class="card-body">${
+            row["Status BO Sales"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">File Form BO</div><div class="card-body"><a href="${
+            row["File Form BO"] || "#"
+          }" target="_blank">Lihat Form</a></div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Alasan Reject Sales</div><div class="card-body">${
+            row["Alasan Reject Sales"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(4/7) Pengorderan Purchasing</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Tanggal Order Purchasing</div><div class="card-body">${
-        row["Tanggal Order Purchasing"] || "-"
-      }</div></div></div>
-      <div class="col-md-4"><div class="card"><div class="card-header">Masa Tunggu</div><div class="card-body">${
-        row["Masa Tunggu"] || "-"
-      }</div></div></div>
-    </div>
+        <h5>(4/7) Pengorderan Purchasing</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Tanggal Order Purchasing</div><div class="card-body">${
+            row["Tanggal Order Purchasing"] || "-"
+          }</div></div></div>
+          <div class="col-md-4"><div class="card"><div class="card-header">Masa Tunggu</div><div class="card-body">${
+            row["Masa Tunggu"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(5/7) Update Estimasi Tiba</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Estimasi Tiba</div><div class="card-body">${
-        row["Estimasi Tiba"] || "-"
-      }</div></div></div>
-    </div>
+        <h5>(5/7) Update Estimasi Tiba</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Estimasi Tiba</div><div class="card-body">${
+            row["Estimasi Tiba"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(6/7) Update Barang Tiba</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">Tanggal Barang Tiba</div><div class="card-body">${
-        row["Tanggal Barang Tiba"] || "-"
-      }</div></div></div>
-    </div>
+        <h5>(6/7) Update Barang Tiba</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">Tanggal Barang Tiba</div><div class="card-body">${
+            row["Tanggal Barang Tiba"] || "-"
+          }</div></div></div>
+        </div>
 
-    <h5>(6/7) Update SO Baru</h5>
-    <div class="row">
-      <div class="col-md-4"><div class="card"><div class="card-header">SO Baru</div><div class="card-body">${
-        row["SO Baru"] || "-"
-      }</div></div></div>
-    </div>
-  </div>
-  `;
+        <h5>(6/7) Update SO Baru</h5>
+        <div class="row">
+          <div class="col-md-4"><div class="card"><div class="card-header">SO Baru</div><div class="card-body">${
+            row["SO Baru"] || "-"
+          }</div></div></div>
+        </div>
+      </div>
+      `;
 
         $("#modalContent").html(modalHtml);
       }
